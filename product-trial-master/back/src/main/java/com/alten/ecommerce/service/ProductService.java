@@ -26,14 +26,14 @@ public class ProductService {
 
     public Product create(Product product, String email) {
         if (!"admin@admin.com".equals(email)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admin can create products.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Connexion admin requise.");
         }
         return productRepository.save(product);
     }
 
     public Product update(Long id, Product updated, String email) {
         if (!"admin@admin.com".equals(email)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admin can update products.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Connexion admin requise.");
         }
         Product p = getById(id);
         updated.setId(p.getId());
@@ -42,7 +42,7 @@ public class ProductService {
 
     public void delete(Long id, String email) {
         if (!"admin@admin.com".equals(email)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admin can delete products.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Connexion admin requise.");
         }
         productRepository.deleteById(id);
     }

@@ -1,3 +1,4 @@
+import { CommonModule } from "@angular/common";
 import { Component, OnInit, inject, signal } from "@angular/core";
 import { Product } from "app/products/data-access/product.model";
 import { ProductsService } from "app/products/data-access/products.service";
@@ -6,6 +7,7 @@ import { ButtonModule } from "primeng/button";
 import { CardModule } from "primeng/card";
 import { DataViewModule } from 'primeng/dataview';
 import { DialogModule } from 'primeng/dialog';
+import { CartService } from "app/cart/cart.service";  
 
 const emptyProduct: Product = {
   id: 0,
@@ -29,12 +31,13 @@ const emptyProduct: Product = {
   templateUrl: "./product-list.component.html",
   styleUrls: ["./product-list.component.scss"],
   standalone: true,
-  imports: [DataViewModule, CardModule, ButtonModule, DialogModule, ProductFormComponent],
+  imports: [CommonModule, DataViewModule, CardModule, ButtonModule, DialogModule, ProductFormComponent],
 })
 export class ProductListComponent implements OnInit {
   private readonly productsService = inject(ProductsService);
 
   public readonly products = this.productsService.products;
+  private readonly cartService = inject(CartService);
 
   public isDialogVisible = false;
   public isCreation = false;
@@ -60,14 +63,20 @@ export class ProductListComponent implements OnInit {
     this.productsService.delete(product.id).subscribe();
   }
 
-  public onSave(product: Product) {
-    if (this.isCreation) {
-      this.productsService.create(product).subscribe();
-    } else {
-      this.productsService.update(product).subscribe();
-    }
-    this.closeDialog();
+ public onSave(product: Product) {
+  if (this.isCreation) {
+    this.productsService.create(product).subscribe(success => {
+      if (success) {
+        console.log("Produit bien créé");
+        this.closeDialog();
+      }
+    });
+  } else {
+    this.productsService.update(product).subscribe(() => {
+      this.closeDialog();
+    });
   }
+}
 
   public onCancel() {
     this.closeDialog();
@@ -75,5 +84,13 @@ export class ProductListComponent implements OnInit {
 
   private closeDialog() {
     this.isDialogVisible = false;
+  }
+
+  trackById(index: number, product: Product): number {
+  return product.id;
+  }
+
+  addToCart(product: Product) {
+    this.cartService.add(product);
   }
 }

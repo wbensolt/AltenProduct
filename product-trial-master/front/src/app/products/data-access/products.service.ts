@@ -1,14 +1,14 @@
 import { Injectable, inject, signal } from "@angular/core";
 import { Product } from "./product.model";
-import { HttpClient } from "@angular/common/http";
-import { catchError, Observable, of, tap } from "rxjs";
+import { HttpClient, HttpHeaders } from "@angular/common/http";
+import { catchError, map, Observable, of, tap } from "rxjs";
 
 @Injectable({
     providedIn: "root"
 }) export class ProductsService {
 
     private readonly http = inject(HttpClient);
-    private readonly path = "/api/products";
+    private readonly path = "http://127.0.0.1:8080/products";
     
     private readonly _products = signal<Product[]>([]);
 
@@ -23,16 +23,30 @@ import { catchError, Observable, of, tap } from "rxjs";
         );
     }
 
-    public create(product: Product): Observable<boolean> {
-        return this.http.post<boolean>(this.path, product).pipe(
-            catchError(() => {
-                return of(true);
-            }),
-            tap(() => this._products.update(products => [product, ...products])),
-        );
-    }
 
-    public update(product: Product): Observable<boolean> {
+public create(product: Product): Observable<boolean> {
+    const { name, description, price, quantity } = product;
+    const payload = { name, description, price, quantity };
+
+    const headers = new HttpHeaders({
+        email: 'admin@admin.com' // ← remplace par l'email réel si besoin
+    });
+
+    return this.http.post<Product>(this.path, payload, { headers }).pipe(
+        tap((createdProduct) => {
+            console.log("Produit ajouté :", createdProduct);
+            this._products.update(products => [createdProduct, ...products]);
+        }),
+        map(() => true),
+        catchError((error) => {
+            console.error("Erreur lors de la création :", error);
+            return of(false);
+        })
+    );
+}
+
+
+public update(product: Product): Observable<boolean> {
         return this.http.patch<boolean>(`${this.path}/${product.id}`, product).pipe(
             catchError(() => {
                 return of(true);

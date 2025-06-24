@@ -14,3 +14,10 @@ export interface Product {
     createdAt: number;
     updatedAt: number;
 }
+
+export interface ProductPayload {
+  name: string;
+  description: string;
+  price: number;
+  quantity: number;
+}

@@ -6,7 +6,9 @@
         {{ title }}
     </div>
     <div class="p-toolbar-group-end">
-        <i class="pi pi-shopping-cart" style="font-size: 2rem"></i>
+        <button pButton icon="pi pi-shopping-cart" [routerLink]="['/cart']" class="p-button-rounded p-button-text p-button-lg">
+        <span *ngIf="cartSize() > 0" class="p-badge p-badge-danger">{{ cartSize() }}</span>
+        </button>
     </div>
 </p-toolbar>
 <p-splitter 
