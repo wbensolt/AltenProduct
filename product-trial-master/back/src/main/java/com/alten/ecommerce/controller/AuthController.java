@@ -37,6 +37,8 @@ public class AuthController {
 
     @PostMapping("/token")
     public ResponseEntity<?> login(@RequestBody Map<String, String> loginData) {
+        System.out.println("POST /token called with body: " + loginData);
+        
         String email = loginData.get("email");
         String password = loginData.get("password");
 

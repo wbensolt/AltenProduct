@@ -1,32 +1,40 @@
 package com.alten.ecommerce.config;
 
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-@Configuration
+
 @EnableWebSecurity
+@Configuration
 public class SecurityConfig {
+
+    @Autowired
+    private JwtFilter jwtFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/h2-console/**") // ignore CSRF pour H2
-            )
-            .headers(headers -> headers
-                .frameOptions(frameOptions -> frameOptions.sameOrigin()) // autorise les frames pour H2
-            )
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/account", "/token", "/h2-console/**").permitAll()
-                .anyRequest().authenticated()
-            )
-            .httpBasic(Customizer.withDefaults()); // si tu veux tester en mode basique
+    http
+        .csrf().disable()
+        .httpBasic().disable()  // désactive Basic Auth
+        .headers().frameOptions().sameOrigin().and()
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers(HttpMethod.POST, "/token").permitAll()
+            .requestMatchers(HttpMethod.POST, "/account").permitAll()
+            .requestMatchers("/h2-console/**").permitAll()
+            .anyRequest().authenticated()
+        )
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+    return http.build();
+}
+
 }
